@@ -1,0 +1,40 @@
+version: '3.9'
+
+services:
+  market-analytics:
+    image: market-analytics
+    container_name: market-analytics
+    depends_on:
+      - db
+      - mocks
+    volumes:
+      - type: bind
+        source: ./market-analytics-app/application.yml
+        target: /application.yml
+    build:
+      context: market-analytics-app/
+      dockerfile: ./dockerfile
+      args:
+        APP_SERVICE_ARG: market-analytics
+        APP_PACKAGE_ARG: com.market.analytics
+    environment:
+      APP_PACKAGE: com.market.analytics
+      APP_SERVICE: market-analytics
+    ports:
+      - 8080:8080
+  mocks:
+    image: market-analytics-mocks:latest
+    build:
+      context: market-analytics-mocks/
+      dockerfile: /dockerfile
+    ports:
+      - 8081:8081
+  db:
+    image: timescale/timescaledb:latest-pg17
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: market-analytics
+    ports:
+      - 5432:5432
